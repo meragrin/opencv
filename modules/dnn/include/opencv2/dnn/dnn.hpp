@@ -626,6 +626,16 @@ CV__DNN_EXPERIMENTAL_NS_BEGIN
       */
     CV_EXPORTS_W Net readNetFromCaffe(const String &prototxt, const String &caffeModel = String());
 
+    /** @brief Reads a network model stored in Caffe model streams.
+      * @details This is a shortcut consisting from createCaffeImport and Net::populateNet calls.
+      */
+    CV_EXPORTS_W Net readNetFromCaffe(std::istream &prototxt);
+
+    /** @brief Reads a network model stored in Caffe model streams.
+      * @details This is a shortcut consisting from createCaffeImport and Net::populateNet calls.
+      */
+    CV_EXPORTS_W Net readNetFromCaffe(std::istream &prototxt, std::istream &caffeModel);
+
     /** @brief Reads a network model stored in Tensorflow model file.
       * @details This is shortcut consisting from createTensorflowImporter and Net::populateNet calls.
       */

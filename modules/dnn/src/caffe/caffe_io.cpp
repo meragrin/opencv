@@ -1108,19 +1108,21 @@ const char* UpgradeV1LayerType(const V1LayerParameter_LayerType type) {
 
 const int kProtoReadBytesLimit = INT_MAX;  // Max size of 2 GB minus 1 byte.
 
+bool ReadProtoFromTextStream(std::istream &text_stream, Message* proto) {
+    IstreamInputStream input(&text_stream);
+    return google::protobuf::TextFormat::Parse(&input, proto);
+}
+
 bool ReadProtoFromTextFile(const char* filename, Message* proto) {
     std::ifstream fs(filename, std::ifstream::in);
     CHECK(fs.is_open()) << "Can't open \"" << filename << "\"";
-    IstreamInputStream input(&fs);
-    bool success = google::protobuf::TextFormat::Parse(&input, proto);
+    bool success = ReadProtoFromTextStream(fs, proto);
     fs.close();
     return success;
 }
 
-bool ReadProtoFromBinaryFile(const char* filename, Message* proto) {
-    std::ifstream fs(filename, std::ifstream::in | std::ifstream::binary);
-    CHECK(fs.is_open()) << "Can't open \"" << filename << "\"";
-    ZeroCopyInputStream* raw_input = new IstreamInputStream(&fs);
+bool ReadProtoFromBinaryStream(std::istream &binary_stream, Message* proto) {
+    ZeroCopyInputStream* raw_input = new IstreamInputStream(&binary_stream);
     CodedInputStream* coded_input = new CodedInputStream(raw_input);
     coded_input->SetTotalBytesLimit(kProtoReadBytesLimit, 536870912);
 
@@ -1128,6 +1130,15 @@ bool ReadProtoFromBinaryFile(const char* filename, Message* proto) {
 
     delete coded_input;
     delete raw_input;
+    return success;
+}
+
+bool ReadProtoFromBinaryFile(const char* filename, Message* proto) {
+    std::ifstream fs(filename, std::ifstream::in | std::ifstream::binary);
+    CHECK(fs.is_open()) << "Can't open \"" << filename << "\"";
+
+    bool success = ReadProtoFromBinaryStream(fs, proto);
+
     fs.close();
     return success;
 }
@@ -1144,6 +1155,18 @@ void ReadNetParamsFromBinaryFileOrDie(const char* param_file,
   CHECK(ReadProtoFromBinaryFile(param_file, param))
       << "Failed to parse NetParameter file: " << param_file;
   UpgradeNetAsNeeded(param_file, param);
+}
+
+void ReadNetParamsFromTextStreamOrDie(std::istream &text_stream,
+                                      NetParameter* param) {
+  CHECK(ReadProtoFromTextStream(text_stream, param))
+      << "Failed to parse NetParameter file from text stream";
+}
+
+void ReadNetParamsFromBinaryStreamOrDie(std::istream &binary_stream,
+                                      NetParameter* param) {
+  CHECK(ReadProtoFromTextStream(binary_stream, param))
+      << "Failed to parse NetParameter file from binary stream";
 }
 
 }

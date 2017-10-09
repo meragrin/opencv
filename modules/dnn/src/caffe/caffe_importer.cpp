@@ -94,6 +94,14 @@ public:
             ReadNetParamsFromBinaryFileOrDie(caffeModel, &netBinary);
     }
 
+    CaffeImporter(std::istream &prototxt, std::istream &caffeModel)
+    {
+        CV_TRACE_FUNCTION();
+
+        ReadNetParamsFromTextStreamOrDie(prototxt, &net);
+        ReadNetParamsFromBinaryStreamOrDie(caffeModel, &netBinary);
+    }
+
     void addParam(const Message &msg, const FieldDescriptor *field, cv::dnn::LayerParams &params)
     {
         const Reflection *refl = msg.GetReflection();
@@ -392,11 +400,31 @@ Ptr<Importer> createCaffeImporter(const String &prototxt, const String &caffeMod
     return Ptr<Importer>(new CaffeImporter(prototxt.c_str(), caffeModel.c_str()));
 }
 
+Ptr<Importer> createCaffeImporter(std::istream &prototxt, std::istream &caffeModel)
+{
+    return Ptr<Importer>(new CaffeImporter(prototxt, caffeModel));
+}
+
 Net readNetFromCaffe(const String &prototxt, const String &caffeModel /*= String()*/)
 {
     CaffeImporter caffeImporter(prototxt.c_str(), caffeModel.c_str());
     Net net;
     caffeImporter.populateNet(net);
+    return net;
+}
+
+Net readNetFromCaffe(std::istream &prototxt)
+{
+    return readNetFromCaffe(prototxt, std::istringstream());
+}
+
+Net readNetFromCaffe(std::istream &prototxt, std::istream &caffeModel)
+{
+    CaffeImporter caffeImporter(prototxt, caffeModel);
+    Net net;
+
+    caffeImporter.populateNet(net);
+
     return net;
 }
 

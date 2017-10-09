@@ -92,6 +92,7 @@
 #ifdef HAVE_PROTOBUF
 
 #include "caffe.pb.h"
+#include <iostream>
 
 namespace cv {
 namespace dnn {
@@ -101,6 +102,12 @@ void ReadNetParamsFromTextFileOrDie(const char* param_file,
                                     caffe::NetParameter* param);
 void ReadNetParamsFromBinaryFileOrDie(const char* param_file,
                                       caffe::NetParameter* param);
+
+// Read parameters from an istream into a NetParameter proto message.
+void ReadNetParamsFromTextStreamOrDie(std::istream &param_stream,
+                                      caffe::NetParameter* param);
+void ReadNetParamsFromBinaryStreamOrDie(std::istream &param_stream,
+                                        caffe::NetParameter* param);
 
 }
 }

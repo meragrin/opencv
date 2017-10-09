@@ -67,6 +67,24 @@ TEST(Test_Caffe, read_googlenet)
     ASSERT_FALSE(net.empty());
 }
 
+TEST(Test_Caffe, read_googlenet_istream)
+{
+    std::ifstream proto(_tf("bvlc_googlenet.prototxt"));
+    Net net = readNetFromCaffe(proto);
+    proto.close();
+    ASSERT_FALSE(net.empty());
+}
+
+TEST(Test_Caffe, read_alexnet_istream)
+{
+    std::ifstream proto(_tf("bvlc_alexnet.prototxt"));
+    std::ifstream model(_tf("bvlc_alexnet.caffemodel"), std::ios::binary);
+    Net net = readNetFromCaffe(proto, model);
+    proto.close();
+    model.close();
+    ASSERT_FALSE(net.empty());
+}
+
 TEST(Reproducibility_AlexNet, Accuracy)
 {
     Net net;
